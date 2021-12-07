@@ -1,50 +1,94 @@
-import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import Loader from 'react-loader-spinner';
-import Container from './components/Container';
-import AppBar from './components/AppBar/AppBar';
-import errorImage from './pages/error.jpg';
 import './App.css';
+import { Component } from 'react';
+import Form from 'components/Form/Form';
+import PhoneBookList from 'components/List/PhoneBookList';
+import Filter from 'components/Filter/Filter';
+import Section from './components/Section/Section';
 
-const HomeView = lazy(() =>
-  import('./pages/HomeView.jsx' /* webpackChunkName: "HomeView" */),
-);
-const NotFoundView = lazy(() =>
-  import('./pages/NotFoundView.jsx' /* webpackChunkName: "NotFoundView" */),
-);
+export default class App extends Component {
+  state = {
+    contacts: [
+      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+    ],
+    filter: '',
+  };
 
-export default function App() {
-  return (
-    <Container title="Hello world!">
-      <AppBar />
+  componentDidMount() {
+    const contacts = localStorage.getItem('contacts');
+    const parsedContacts = JSON.parse(contacts);
 
-      <Suspense
-        fallback={
-          <Loader
-            type="Puff"
-            color="#00BFFF"
-            height={100}
-            width={100}
-            timeout={3000}
-          />
-        }
-      >
-        <Routes>
-          <Route path="" element={<HomeView />} />
-          <Route
-            path="*"
-            element={
-              <NotFoundView
-                errorImage={errorImage}
-                messadge="Ошибка 404: страница не найдена :("
-              />
-            }
-          />
-        </Routes>
-      </Suspense>
+    if (parsedContacts) {
+      this.setState({ contacts: parsedContacts });
+    }
+  }
 
-      <ToastContainer />
-    </Container>
-  );
+  componentDidUpdate(prevState) {
+    const { contacts } = this.state;
+
+    if (contacts !== prevState.contacts) {
+      console.log('contacts were updated');
+      localStorage.setItem('contacts', JSON.stringify(contacts));
+    }
+  }
+
+  formSubmit = newContact => {
+    const dublicate = this.state.contacts.find(
+      contact => newContact.name === contact.name,
+    );
+
+    if (dublicate) {
+      alert(`${newContact.name} has already use`);
+      return;
+    }
+
+    this.setState(({ contacts }) => ({ contacts: [newContact, ...contacts] }));
+    console.log(newContact);
+  };
+
+  handleChangeFilter = e => {
+    this.setState({ filter: e.target.value });
+  };
+
+  handleFilter = () => {
+    const { contacts, filter } = this.state;
+
+    const normalizeContact = filter.toLowerCase();
+
+    //console.log(normalizeContact)
+
+    const needContacts = contacts.filter(contact =>
+      contact.name.toLowerCase().includes(normalizeContact),
+    );
+
+    if (needContacts.length === 0) {
+      alert(`This ${filter} Not faund`);
+    }
+
+    return needContacts;
+  };
+
+  handleDeleteContact = id => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== id),
+    }));
+  };
+
+  render() {
+    const { filter } = this.state;
+    const filteredContacts = this.handleFilter();
+
+    return (
+      <Section title="Phonebook">
+        <Form onSubmit={this.formSubmit} />
+        <Filter value={filter} onChange={this.handleChangeFilter} />
+        <PhoneBookList
+          contact={filteredContacts}
+          onDeleteContact={this.handleDeleteContact}
+        />
+      </Section>
+    );
+  }
 }
