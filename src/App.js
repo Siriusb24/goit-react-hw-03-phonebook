@@ -63,10 +63,6 @@ export default class App extends Component {
       contact.name.toLowerCase().includes(normalizeContact),
     );
 
-    if (needContacts.length === 0) {
-      alert(`This ${filter} Not faund`);
-    }
-
     return needContacts;
   };
 

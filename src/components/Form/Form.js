@@ -8,7 +8,14 @@ export default class Form extends Component {
     number: '',
   };
 
-  handleChange = e => {
+  handleChangeName = e => {
+    const { name, value } = e.target;
+    //console.log(e.target.name)
+
+    this.setState({ [name]: value });
+  };
+
+  handleChangeNumber = e => {
     const { name, value } = e.target;
     //console.log(e.target.name)
 
@@ -44,7 +51,7 @@ export default class Form extends Component {
             title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
             required
             value={this.state.name}
-            onChange={this.handleChange}
+            onChange={this.handleChangeName}
             className={s.input}
           />
         </label>
@@ -56,7 +63,8 @@ export default class Form extends Component {
             pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
             title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
             required
-            onChange={this.handleChange}
+            value={this.state.number}
+            onChange={this.handleChangeNumber}
             className={s.input}
           />
         </label>
